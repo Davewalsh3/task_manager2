@@ -9,8 +9,7 @@ if path.exists("env.py"):
 
 app = Flask(__name__)
 app.config["MONGO_DBNAME"] = 'task_manager'
-app.config["MONGO_URI"] = os.environ.get("MONGO_URI", "mongodb://localhost")
-
+app.config["MONGO_URI"] = os.getenv('MONGO_URI', 'mongodb://localhost')
 
 mongo = PyMongo(app)
 
@@ -18,7 +17,7 @@ mongo = PyMongo(app)
 @app.route('/')
 @app.route('/get_tasks')
 def get_tasks():
-    return render_template('tasks.html',
+    return render_template("tasks.html",
                            tasks=mongo.db.tasks.find())
 
 
@@ -69,11 +68,16 @@ def get_categories():
                            categories=mongo.db.categories.find())
 
 
+@app.route('/delete_category/<category_id>')
+def delete_category(category_id):
+    mongo.db.categories.remove({'_id': ObjectId(category_id)})
+    return redirect(url_for('get_categories'))
+
+
 @app.route('/edit_category/<category_id>')
 def edit_category(category_id):
     return render_template('editcategory.html',
-                           category=mongo.db.categories.find_one(
-                               {'_id': ObjectId(category_id)}))
+                           category=mongo.db.categories.find_one({'_id': ObjectId(category_id)}))
 
 
 @app.route('/update_category/<category_id>', methods=['POST'])
@@ -81,12 +85,6 @@ def update_category(category_id):
     mongo.db.categories.update(
         {'_id': ObjectId(category_id)},
         {'category_name': request.form.get('category_name')})
-    return redirect(url_for('get_categories'))
-
-
-@app.route('/delete_category/<category_id>')
-def delete_category(category_id):
-    mongo.db.categories.remove({'_id': ObjectId(category_id)})
     return redirect(url_for('get_categories'))
 
 
