@@ -77,7 +77,8 @@ def delete_category(category_id):
 @app.route('/edit_category/<category_id>')
 def edit_category(category_id):
     return render_template('editcategory.html',
-                           category=mongo.db.categories.find_one({'_id': ObjectId(category_id)}))
+                           category=mongo.db.categories.find_one
+                           ({'_id': ObjectId(category_id)}))
 
 
 @app.route('/update_category/<category_id>', methods=['POST'])
